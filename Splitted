@@ -1,0 +1,15 @@
+
+public class splitted {
+	public int counter;
+	public double total;
+	public splitted() {
+		counter=0;
+		total=0;
+	}
+	public splitted(int counter, Double total) {
+		this.counter=counter;
+		this.total=total;
+		
+		
+	}
+}
