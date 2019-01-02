@@ -1,0 +1,499 @@
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Vector;
+import javax.imageio.ImageIO;
+import javax.swing.text.StyledEditorKit.BoldAction;
+
+import org.omg.PortableServer.ID_ASSIGNMENT_POLICY_ID;
+
+public class Loyd {
+
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		//int levels = 128;
+	/*	Vector<Double> vec = new Vector<>();
+		vec.add((double) 1);
+		vec.add((double) 2);
+		vec.add((double) 7);
+		vec.add((double) 9);
+		vec.add((double) 4);
+		vec.add((double) 11);
+		vec.add((double) 3);
+		vec.add((double) 4);
+		vec.add((double) 6);
+		vec.add((double) 6);
+		vec.add((double) 12);
+		vec.add((double) 12);
+		vec.add((double) 4);
+		vec.add((double) 9);
+		vec.add((double) 15);
+		vec.add((double) 14);
+		vec.add((double) 9);
+		vec.add((double) 9);
+		vec.add((double) 10);
+		vec.add((double) 10);
+		vec.add((double) 20);
+		vec.add((double) 18);
+		vec.add((double) 8);
+		vec.add((double) 8);
+		vec.add((double) 4);
+		vec.add((double) 3);
+		vec.add((double) 17);
+		vec.add((double) 16);
+		vec.add((double) 1);
+		vec.add((double) 4);
+		vec.add((double) 4);
+		vec.add((double) 5);
+		vec.add((double) 18);
+		vec.add((double) 18);
+		vec.add((double) 5);
+		vec.add((double) 6);
+		*/
+	/*	int [][] arr = getmyimage("myimg.jpg");
+		File file = new File("myimg.jpg");
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		int width = image.getWidth();
+		int height = image.getHeight();
+		for (int i = 0; i <width; i++) {
+			for (int j=0; j<height; j++) {
+				vec.add((double) arr[i][j]);
+			}
+		}
+		quantize(vec, levels);
+		compress(vec);*/
+		//decompress();
+		//writemyimage();
+		//finalcompimg("myimg.jpg", 4);
+		//finaldecompimg();
+		//finalcompnum(vec,128);
+		//finaldecompnum();
+	}
+	public static void finalcompimg (String path,int levels ) throws IOException {
+		Vector<Double> vec = new Vector<>();
+		int [][] arr = getmyimage(path);
+		File file = new File(path);
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		int width = image.getWidth();
+		int height = image.getHeight();
+		for (int i = 0; i <width; i++) {
+			for (int j=0; j<height; j++) {
+				vec.add((double) arr[i][j]);
+			}
+		}
+		quantize(vec, levels);
+		compress(vec);
+		
+		
+	}
+
+	public static void finaldecompimg() throws IOException {
+		decompress();
+		writemyimage();
+	}
+	
+	public static void finalcompnum(Vector<Double> vec, int levels) throws IOException {
+		quantize(vec, levels);
+		compress(vec);
+
+		
+		
+		
+	}
+
+	public static void finaldecompnum () throws IOException {		
+		decompress();
+	}
+	
+	public static void compress (Vector<Double> data) throws IOException {
+	
+		FileReader myff1 = new FileReader("quanttable.txt");
+		BufferedReader myReader = new BufferedReader(myff1);
+		String line = myReader.readLine();
+		for (int i = 0; i <data.size(); i++) {
+			System.out.println("-------------" + data.get(i));
+		}
+		Vector<Double>q=new Vector<>();
+		String [] myq=line.split(" ");
+		for (int i = 0 ; i < myq.length; i++) {
+			q.add(Double.parseDouble(myq[i]));
+			
+			System.out.println("qqqqqqqq"+q.get(i));
+		}
+		String line2 = myReader.readLine();
+		Vector<Double>r1=new Vector<>();
+		Vector<Double>r2=new Vector<>();
+		String [] myr1=line2.split(" ");
+		for (int i = 0 ; i < (myq.length)*2; i=i+2) {
+			r1.add(Double.parseDouble(myr1[i]));
+			r2.add(Double.parseDouble(myr1[i+1]));
+		}
+		String line3 = myReader.readLine();
+		Vector<Double>qneg=new Vector<>();
+		String [] myqneg=line3.split(" ");
+		for (int i = 0 ; i < myq.length; i++) {
+			qneg.add(Double.parseDouble(myqneg[i]));
+			
+			System.out.println("qneg " + i + qneg.get(i));
+		}
+		//System.out.println(q.size()+ " " + r1.size() + " " + r2.size() + " " + qneg.size());
+		
+		String comcode="";
+		System.out.println("SIIZIIEIEIIE" + data.size());
+		Object obj = Collections.max(data);
+		System.out.println(obj);
+		int count = 0;	
+		
+		Vector<Double> dkhlt = new Vector<>();
+		for (int i = 0 ; i<data.size(); i++ ) {
+		//	System.out.println("-------------");
+		//	System.out.println("DATA"+data.get(i));
+			//System.out.println("heya"+data.get(1050));
+			if (data.get(i)==0) {
+				count++;
+				comcode+=Math.round(q.get(0))+" ";
+			}
+			else {
+			for (int j=0 ; j<q.size(); j++) {
+	
+				if (data.get(i)>r1.get(j) && data.get(i)<=r2.get(j) ) {
+				count++;		
+			
+				comcode+=Math.round(q.get(j))+" ";
+				//System.out.println("DATA GAT"+data.get(i));
+
+				}
+
+				
+	
+			}
+			}
+
+		}
+
+		System.out.println("COUNTTTTT"+count);
+		System.out.println("compression code" + comcode);
+		FileWriter myff = new FileWriter("compressioncode.txt");
+		BufferedWriter mywrite = new BufferedWriter(myff);
+		mywrite.write(comcode);
+		mywrite.close();
+		
+		
+	}
+	
+	public static void decompress () throws IOException {
+
+		FileReader myff1 = new FileReader("quanttable.txt");
+		BufferedReader myReader = new BufferedReader(myff1);
+		String line = myReader.readLine();
+		Vector<Double>q=new Vector<>();
+		String [] myq=line.split(" ");
+		for (int i = 0 ; i < myq.length; i++) {
+			q.add(Double.parseDouble(myq[i]));
+			
+			System.out.println("qqqqqqqq"+q.get(i));
+		}
+		String line2 = myReader.readLine();
+		Vector<Double>r1=new Vector<>();
+		Vector<Double>r2=new Vector<>();
+		String [] myr1=line2.split(" ");
+		for (int i = 0 ; i < (myq.length)*2; i=i+2) {
+			r1.add(Double.parseDouble(myr1[i]));
+			r2.add(Double.parseDouble(myr1[i+1]));
+		}
+		String line3 = myReader.readLine();
+		Vector<Double>qneg=new Vector<>();
+		String [] myqneg=line3.split(" ");
+		for (int i = 0 ; i < myq.length; i++) {
+			qneg.add(Double.parseDouble(myqneg[i]));
+			
+			System.out.println(qneg.get(i));
+		}
+		
+			File file = new File("compressioncode.txt"); 
+		  
+		  BufferedReader br = new BufferedReader(new FileReader(file)); 		  
+		  String input="";
+		  input+=br.readLine(); 
+		  br.close();
+		  System.out.println();
+		  String[] splt = input.split(" ");
+		  String decompcode="";
+		  for (int i = 0; i< splt.length; i++) {
+			 
+			  for (int j = 0 ; j<q.size(); j++) {
+				  if (Double.parseDouble(splt[i])==q.get(j)) {
+					  decompcode+=Math.round(qneg.get(j))+" ";
+					  
+				  }
+				  
+			  }
+			  
+		  }
+		  System.out.println(decompcode);
+		  FileWriter myffxx = new FileWriter("Dcompressioncode.txt");
+			BufferedWriter mywritex = new BufferedWriter(myffxx);
+			mywritex.write(decompcode);
+			mywritex.close();
+		//	 ImageIO.write(decompcode, "png", new File("Text.png"));
+		  
+		
+	}
+	
+	public static int minval(Double data, Vector<Double> averages) {
+		int index = 0;
+		Vector<Double> diff = new Vector<>();
+		double min_diff = 0;
+		for (int i = 0; i < averages.size(); i++) {
+
+			diff.add(Math.abs(data - averages.get(i)));
+
+		}
+		min_diff = diff.get(0);
+		for (int i = 1; i < diff.size(); i++) {
+			if (diff.get(i) < min_diff) {
+				min_diff = diff.get(i);
+				index = i;
+			}
+
+		}
+
+		return index;
+	}
+
+	public void fillelements(Vector<Double> myvec, int levels) throws IOException {
+
+		quantize(myvec, levels);
+
+	}
+
+	public static void quantize(Vector<Double> vec, int levels) throws IOException {
+
+		Vector<Double> averages = new Vector<>();
+		Vector<splitted> mylevels = new Vector<>();
+		mylevels.clear();
+		Double sum = (double) 0;
+		Double average = (double) 0;
+		for (int i = 0; i < vec.size(); i++) {
+			sum += vec.get(i);
+
+		}
+		average = sum / vec.size();
+		average = (double) Math.round(average);
+		averages.add(average);
+
+		while (averages.size() < levels) {
+			FileWriter myff = new FileWriter("averages.txt");
+			BufferedWriter mywrite = new BufferedWriter(myff);
+
+			System.out.println("---------------");
+			
+			// System.out.println("avvvvv!!!" + average);
+
+			int mysize = averages.size();
+			for (int i = 0; i < mysize; i++) {
+				averages.add(averages.get(i) + 1);
+				averages.set(i, averages.get(i) - 1);
+
+			}
+			for (int i = 0; i < averages.size(); i++) {
+				System.out.println(averages.get(i));
+		
+			}
+
+
+
+			/*
+			 * for (int i = 0; i<averages.size() ; i++) {
+			 * System.out.println(averages.get(i));
+			 * 
+			 * }
+			 */
+			mylevels.clear();
+			for (int i = 0; i < averages.size(); i++) {
+				splitted s = new splitted();
+				s.counter = 0;
+				s.total = 0;
+				mylevels.add(s);
+
+			}
+
+			for (int i = 0; i < vec.size(); i++) {
+				int myind = minval(vec.get(i), averages);
+				int count = mylevels.get(myind).counter + 1;
+				double total = mylevels.get(myind).total + vec.get(i);
+				splitted newx = new splitted(count, total);
+				mylevels.set(myind, newx);
+			}
+			averages.clear();
+			System.out.println("!!!!! mylevel sive" + mylevels.size());
+			for (int i = 0; i < mylevels.size(); i++) {
+				System.out.println("total  " + mylevels.get(i).total + "     " + mylevels.get(i).counter);
+				Double t = (double) Math.round(mylevels.get(i).total / mylevels.get(i).counter);
+				averages.add(t);
+			}
+
+			averages.sort(null);
+			for (int i = 0; i < averages.size(); i++) {
+				System.out.println(averages.get(i));
+				mywrite.write(averages.get(i)+ " ");
+			}
+			getQuantTable(averages, vec , levels);
+			mywrite.close();
+		}
+
+	}
+
+	public static void getQuantTable (Vector<Double> avg,Vector<Double>myvec, int levels) throws IOException {
+		FileWriter myff = new FileWriter("quanttable.txt");
+		BufferedWriter mywrite = new BufferedWriter(myff);
+
+		Vector<Double> ranges = new Vector<>();
+		Vector<Double> q = new Vector<>();
+		Vector<Double> qneg = new Vector<>();
+		for (int i = 0;i<avg.size();i++) {
+			q.add((double) i);
+			
+			mywrite.write((double) i + " ");
+		}
+		mywrite.write("\r\n");
+		
+		
+		
+		ranges.add((double) 0);
+		for (int i=1; i <avg.size(); i++) {
+			//System.out.println("AAA" + avg.get(i )+ "  " + avg.get(i-1));
+			Double aver = (avg.get(i)+avg.get(i-1))/2;
+			ranges.add(aver);
+			ranges.add(aver);
+			
+		}
+	/*	for (int i =0; i<ranges.size(); i++) {
+			System.out.println(ranges.get(i) + "\\\\\\\\\\\\\\\\\\");
+		}*/
+		
+		Object obj = Collections.max(myvec);
+		ranges.add((Double) obj);
+		System.out.println("MAXXX"+obj);
+		//System.out.println((Double) obj + " \\\\\\\\\\\\ ");
+		
+		for (int i = 0 ; i<ranges.size(); i++) {
+			
+			mywrite.write(ranges.get(i) + " ");
+		}
+			mywrite.write("\r\n");
+		for (int i =0 ; i<avg.size(); i++) {
+			qneg.add(avg.get(i));
+			mywrite.write(avg.get(i) + " ");
+			
+		}
+		mywrite.close();
+	}
+
+	public static int[][] getmyimage(String filePath) {
+		int width = 0;
+		int height = 0;
+		
+		File file = new File(filePath);
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		width = image.getWidth();
+		System.out.println(width);
+		height = image.getHeight();
+		System.out.println(height);
+		int[][] pixels = new int[height][width];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int rgb = image.getRGB(x, y);
+				int alpha = (rgb >> 24) & 0xff;
+				int r = (rgb >> 16) & 0xff;
+				int g = (rgb >> 8) & 0xff;
+				int b = (rgb >> 0) & 0xff;
+
+				pixels[y][x] = r;
+			}
+		}
+
+		return pixels;
+	}
+
+	public static void writemyimage( ) throws IOException {
+
+			File file = new File("myimg.jpg");
+			BufferedImage image = null;
+			try {
+				image = ImageIO.read(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			int width = image.getWidth();
+			int height = image.getHeight();
+			System.out.println("height " + height + "  width " + width);
+	        String input = "";
+	        try {
+	            BufferedReader reader;
+	            reader = new BufferedReader(new FileReader("Dcompressioncode.txt"));
+	            String line = reader.readLine();
+	            input = line;
+	            reader.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        String[] pix = input.split(" ");
+	        System.out.println("pix: " + pix.length);
+	        System.out.println("original: " + width*height);
+	        int h = 0;
+	        int[][] pixels = new int[height][width];
+	        for (int x = 0; x < height; x++) {
+	            for (int y = 0; y < width; y++) {
+	                pixels[x][y] = Integer.parseInt(pix[h]);
+	                h++;
+	            }
+	        }
+	        File fileout = new File("myimg2.jpg");
+	        BufferedImage image2 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+	        for (int x = 0; x < width; x++) {
+	            for (int y = 0; y < height; y++) {
+	                image2.setRGB(x, y, (pixels[y][x] << 16) | (pixels[y][x] << 8) | (pixels[y][x]));
+	            }
+	        }
+	        try {
+	            ImageIO.write(image2, "jpg", fileout);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	
+	}
+
+}
+
